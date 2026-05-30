@@ -11,6 +11,25 @@ class SyncWorkflowRepository:
     def __init__(self, session: Session):
         self.session = session
 
+    def get_stuck_steps(self, timeout_minutes: int) -> List[StepExecution]:
+        from datetime import datetime, timedelta
+        
+        limit_time = datetime.utcnow() - timedelta(minutes=timeout_minutes)
+        result = self.session.execute(
+            select(StepExecution)
+            .where(StepExecution.status == "RUNNING")
+            .where(StepExecution.executed_at < limit_time) # Assuming executed_at is the last update time, based on schema
+        )
+        return list(result.scalars().all())
+
+    def reset_step_status(self, step_id: int):
+        self.session.execute(
+            update(StepExecution)
+            .where(StepExecution.id == step_id)
+            .values(status="PENDING", error="Reset by recovery mechanism")
+        )
+        self.session.commit()
+
     def get_execution(self, execution_id: int) -> Optional[WorkflowExecution]:
         # Using options(selectinload(...)) with sync session
         result = self.session.execute(

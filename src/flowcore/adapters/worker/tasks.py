@@ -1,6 +1,9 @@
+from celery.signals import worker_init
+
 # Author: Ezequiel Ranieri <ez.ranieri@gmail.com>
 
 import asyncio
+import os
 from datetime import datetime
 from loguru import logger
 from .celery_app import celery_app
@@ -8,6 +11,22 @@ from ...domain.engine.executor import WorkflowEngine
 from ...domain.dsl.registry import registry
 from ...infrastructure.db.session import get_sync_session
 from ...infrastructure.repositories.sync_workflow_repository import SyncWorkflowRepository
+
+@worker_init.connect
+def recover_stuck_steps(**kwargs):
+    timeout = int(os.getenv("STUCK_STEP_TIMEOUT_MINUTES", "15"))
+    logger.info(f"Worker startup: checking for stuck steps with timeout {timeout} minutes")
+    
+    session = get_sync_session()
+    try:
+        repo = SyncWorkflowRepository(session)
+        stuck_steps = repo.get_stuck_steps(timeout)
+        for step in stuck_steps:
+            logger.warning(f"Found stuck step {step.id} (name: {step.step_name}), resetting to PENDING")
+            repo.reset_step_status(step.id)
+        logger.info(f"Worker startup: recovery complete, {len(stuck_steps)} steps reset")
+    finally:
+        session.close()
 
 @celery_app.task(name="flowcore.tasks.execute_workflow")
 def execute_workflow_task(execution_id: int):
