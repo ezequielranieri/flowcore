@@ -61,6 +61,7 @@ You can visualize and interact with the API endpoints using the Swagger UI.
 
 ## Features
 - ✅ **Declarative DSL:** Define workflows and tasks with simple decorators.
+- ⚡ **True Distribution:** Each workflow step runs as an independent Celery task, enabling horizontal scaling across workers.
 - 🔀 **Advanced Flow Control:** Support for Fan-out, Branching (conditions), and Join/Barrier (`wait_for`).
 - 🔄 **Resilience:** Automatic retries with exponential backoff.
 - 🏗️ **Hexagonal Architecture:** Decoupled, testable, and maintainable code.
@@ -95,11 +96,10 @@ Every technology choice in Flowcore was made deliberately:
 graph TD
     API[FastAPI] -->|Start Workflow| Service[WorkflowService]
     Service -->|Create Record| DB[(PostgreSQL)]
-    Service -->|Enqueue| Broker[Redis/RabbitMQ]
-    Broker -->|Execute| Worker[Celery Worker]
-    Worker -->|Process| Engine[WorkflowEngine]
-    Engine -->|Update State| DB
-    Engine -->|Decision| Decision[Decision Logic]
+    Service -->|Enqueue| TaskInit[execute_workflow_task]
+    TaskInit -->|Enqueue Steps| TaskStep[execute_step_task]
+    TaskStep -->|Loop/Next| TaskStep
+    TaskStep -->|Update State| DB
 ```
 
 The project follows a **Hexagonal Architecture** (Ports and Adapters):
@@ -131,12 +131,17 @@ flowcore/
 └── Makefile                # Automation
 ```
 
+## Known Limitations
+- **Memory Registry**: Task and workflow definitions are stored in memory. They must be re-registered on every process startup (API and Workers).
+- **Single DB Transaction**: Step execution and status updates are not yet part of a single atomic transaction.
+- **Phase 2 Completion**: Workflow completion detection in fan-out scenarios checks step count rather than DAG traversal. Full DAG-aware completion is planned for Phase 3.
+
 ## Roadmap
-1. **Phase 1 (MVP):** Basic orchestration, persistence, and initial DSL. (Current)
-2. **Phase 2:** Real distributed step execution (parallel fan-out in workers).
-3. **Phase 3:** Real-time observability dashboard.
-4. **Phase 4:** Multi-tenant support and resource isolation.
-5. **Phase 5:** High availability and engine self-healing.
+1. **Phase 1 (MVP):** Basic orchestration, persistence, and initial DSL. ✅ Completed
+2. **Phase 2:** Real distributed step execution — each step runs as an independent Celery task. ✅ Completed
+3. **Phase 3:** Real-time observability dashboard. (Planned)
+4. **Phase 4:** Multi-tenant support and resource isolation. (Planned)
+5. **Phase 5:** High availability and engine self-healing. (Planned)
 
 ## Contributing
 Contributions are welcome! Please read `CONTRIBUTING.md` for more details on how to get started.

@@ -1,7 +1,5 @@
 # Author: Ezequiel Ranieri <ez.ranieri@gmail.com>
 
-# Author: Ezequiel Ranieri <ez.ranieri@gmail.com>
-
 import math
 import time
 from collections import deque
@@ -20,16 +18,34 @@ class WorkflowEngine:
         delay = min(300, math.pow(2, retry_count))
         return int(delay)
 
+    def get_initial_steps(self, workflow_def: WorkflowDefinition) -> List[Step]:
+        """
+        Returns the first steps of the workflow (those without predecessors).
+        """
+        if not workflow_def.steps:
+            return []
+        # For now, we assume the first step in the list is the entry point
+        # In a real DAG, we'd look for steps with no incoming edges.
+        return [workflow_def.steps[0]]
+
+    def execute_step(self, step: Step, context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Executes a single step and returns the result.
+        """
+        from ...domain.dsl.registry import registry
+        task_def = registry.get_task(step.task_name)
+        result = task_def.func(context)
+        return result if isinstance(result, dict) else {}
+
     def execute_workflow(
         self, 
         workflow_def: WorkflowDefinition, 
         initial_context: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Pure domain execution logic.
+        Pure domain execution logic (Synchronous/Simulation).
         """
         from loguru import logger
-        from ...domain.dsl.registry import registry
         
         context = initial_context.copy()
         completed_steps: Set[str] = set()
@@ -37,7 +53,7 @@ class WorkflowEngine:
         if not workflow_def.steps:
             return context
 
-        queue = deque([workflow_def.steps[0]])
+        queue = deque(self.get_initial_steps(workflow_def))
         
         while queue:
             step = queue.popleft()
@@ -47,11 +63,9 @@ class WorkflowEngine:
 
             logger.info(f"Executing step: {step.name} (task: {step.task_name})")
             
-            # Execute the task
-            task_def = registry.get_task(step.task_name)
-            result = task_def.func(context)
-            if isinstance(result, dict):
-                context.update(result)
+            # Execute the step
+            result = self.execute_step(step, context)
+            context.update(result)
             
             completed_steps.add(step.name)
             
