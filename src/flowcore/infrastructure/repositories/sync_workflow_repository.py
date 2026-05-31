@@ -31,13 +31,11 @@ class SyncWorkflowRepository:
         self.session.commit()
 
     def get_execution(self, execution_id: int) -> Optional[WorkflowExecution]:
-        # Using options(selectinload(...)) with sync session
-        result = self.session.execute(
-            select(WorkflowExecution)
-            .where(WorkflowExecution.id == execution_id)
-            .options(selectinload(WorkflowExecution.steps))
+        return self.session.get(
+            WorkflowExecution, 
+            execution_id, 
+            options=[selectinload(WorkflowExecution.steps)]
         )
-        return result.scalar_one_or_none()
 
     def update_execution_status(self, execution_id: int, status: str, error: Optional[str] = None, completed_at: Optional[datetime] = None):
         values = {"status": status, "error": error}

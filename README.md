@@ -134,13 +134,27 @@ flowcore/
 ## Known Limitations
 - **Memory Registry**: Task and workflow definitions are stored in memory. They must be re-registered on every process startup (API and Workers).
 - **Single DB Transaction**: Step execution and status updates are not yet part of a single atomic transaction.
-- **Phase 2 Completion**: Workflow completion detection in fan-out scenarios checks step count rather than DAG traversal. Full DAG-aware completion is planned for Phase 3.
 
 ## Roadmap
 1. **Phase 1 (MVP):** Basic orchestration, persistence, and initial DSL. ✅ Completed
-2. **Phase 2:** Real distributed step execution — each step runs as an independent Celery task. ✅ Completed
-3. **Phase 3:** Real-time observability dashboard. (Planned)
+2. **Phase 2:** Real distributed step execution. ✅ Completed
+3. **Phase 3:** DAG engine with networkx + auto-discovery. ✅ Completed
 4. **Phase 4:** Multi-tenant support and resource isolation. (Planned)
+5. **Phase 5:** High availability and engine self-healing. (Planned)
+
+## Contributing
+Contributions are welcome! Please read `CONTRIBUTING.md` for more details on how to get started.
+
+## Author
+**Ezequiel Ranieri**  
+Backend & Security Engineer | Distributed Systems & Authentication  
+📧 ez.ranieri@gmail.com  
+🐙 [GitHub](https://github.com/ezequielranieri)  
+💼 [LinkedIn](https://www.linkedin.com/in/ezequielranieri)
+
+## License
+MIT License.
+. (Planned)
 5. **Phase 5:** High availability and engine self-healing. (Planned)
 
 ## Contributing
