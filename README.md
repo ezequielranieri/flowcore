@@ -1,32 +1,9 @@
-# Flowcore 🚀
+# Flowcore
+A distributed and durable workflow engine for Python.
 
-**Distributed, Durable, and Observable Workflow Engine in Python.**
+![Flowcore Architecture](docs/images/durability.png)
 
-> Built by [Ezequiel Ranieri](https://github.com/ezequielranieri) 
-> — Backend & Security Engineer specialized in Distributed Systems
-
----
-
-## What is Flowcore?
-I built Flowcore to solve a real problem I kept encountering: complex business processes that needed to survive failures, resume from where they stopped, and scale across workers. Flowcore is a lightweight yet powerful workflow execution engine designed to be durable and distributed. It allows defining complex business processes using an elegant DSL based on Python decorators, ensuring reliable step execution with automatic retries and state persistence at every transition.
-
-## Quick Demo
-
-```python
-from flowcore.domain.dsl.primitives import task, workflow
-from flowcore.domain.dsl.models import Step
-
-@task(name="validate_order", max_retries=3)
-def validate_order(ctx: dict):
-    return {"valid": True}
-
-@workflow(name="order_process", version="1.0.0")
-class OrderWorkflow:
-    steps = [
-        Step(name="validate", task_name="validate_order", next_steps=["pay"]),
-        Step(name="pay", task_name="process_payment")
-    ]
-```
+Flowcore allows you to define complex, multi-step workflows in Python using a declarative DSL and execute them in a distributed environment with guaranteed persistence and resilience.
 
 ## Quickstart
 
@@ -132,30 +109,18 @@ flowcore/
 ```
 
 ## Known Limitations
-- **Memory Registry**: Task and workflow definitions are stored in memory. They must be re-registered on every process startup (API and Workers).
 - **Single DB Transaction**: Step execution and status updates are not yet part of a single atomic transaction.
 
 ## Roadmap
-1. **Phase 1 (MVP):** Basic orchestration, persistence, and initial DSL. ✅ Completed
-2. **Phase 2:** Real distributed step execution. ✅ Completed
-3. **Phase 3:** DAG engine with networkx + auto-discovery. ✅ Completed
-4. **Phase 4:** Multi-tenant support and resource isolation. (Planned)
-5. **Phase 5:** High availability and engine self-healing. (Planned)
 
-## Contributing
-Contributions are welcome! Please read `CONTRIBUTING.md` for more details on how to get started.
-
-## Author
-**Ezequiel Ranieri**  
-Backend & Security Engineer | Distributed Systems & Authentication  
-📧 ez.ranieri@gmail.com  
-🐙 [GitHub](https://github.com/ezequielranieri)  
-💼 [LinkedIn](https://www.linkedin.com/in/ezequielranieri)
-
-## License
-MIT License.
-. (Planned)
-5. **Phase 5:** High availability and engine self-healing. (Planned)
+1. Phase 1 (MVP): Basic orchestration, persistence, and initial DSL. ✅ Completed
+2. Phase 2: Real distributed step execution. ✅ Completed
+3. Phase 3: DAG engine with networkx + auto-discovery. ✅ Completed
+4. Phase 4: Observability with OpenTelemetry + Jaeger. (Planned)
+5. Phase 5: Sagas / Compensating Actions. (Planned)
+6. Phase 6: Native CLI. (Planned)
+7. Phase 7: Workflow versioning. (Planned)
+8. Phase 8: Multi-tenancy. (Planned)
 
 ## Contributing
 Contributions are welcome! Please read `CONTRIBUTING.md` for more details on how to get started.
