@@ -1,7 +1,36 @@
 # Flowcore
 A distributed and durable workflow engine for Python.
 
-![Flowcore Architecture](docs/images/durability.png)
+> Built by [Ezequiel Ranieri](https://github.com/ezequielranieri) 
+> — Backend & Security Engineer specialized in Distributed Systems
+
+## What is Flowcore?
+I built Flowcore to solve a real problem I kept encountering: 
+complex business processes that needed to survive failures, resume 
+from where they stopped, and scale across workers. Flowcore is a 
+lightweight yet powerful workflow execution engine designed to be 
+durable and distributed. It allows defining complex business 
+processes using an elegant DSL based on Python decorators, ensuring 
+reliable step execution with automatic retries and state persistence 
+at every transition.
+
+## Quick Demo
+
+```python
+from flowcore.domain.dsl.primitives import task, workflow
+from flowcore.domain.dsl.models import Step
+
+@task(name="validate_order", max_retries=3)
+def validate_order(ctx: dict):
+    return {"valid": True}
+
+@workflow(name="order_process", version="1.0.0")
+class OrderWorkflow:
+    steps = [
+        Step(name="validate", task_name="validate_order", next_steps=["pay"]),
+        Step(name="pay", task_name="process_payment")
+    ]
+```
 
 Flowcore allows you to define complex, multi-step workflows in Python using a declarative DSL and execute them in a distributed environment with guaranteed persistence and resilience.
 
@@ -38,6 +67,8 @@ You can visualize and interact with the API endpoints using the Swagger UI.
 
 ## Features
 - ✅ **Declarative DSL:** Define workflows and tasks with simple decorators.
+- 🔍 **Auto-discovery:** Workers automatically discover and register workflow definitions on startup. Zero manual imports required.
+- 🕸️ **Real DAG Engine:** Workflow completion uses networkx graph traversal, correctly handling fan-out and complex topologies.
 - ⚡ **True Distribution:** Each workflow step runs as an independent Celery task, enabling horizontal scaling across workers.
 - 🔀 **Advanced Flow Control:** Support for Fan-out, Branching (conditions), and Join/Barrier (`wait_for`).
 - 🔄 **Resilience:** Automatic retries with exponential backoff.
