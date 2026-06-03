@@ -1,6 +1,6 @@
 import pytest
-from src.flowcore.domain.engine.dag import WorkflowDAG
-from src.flowcore.domain.dsl.models import WorkflowDefinition, Step
+from flowcore.domain.engine.dag import WorkflowDAG
+from flowcore.domain.dsl.models import WorkflowDefinition, Step
 
 def test_dag_construction_and_terminal_nodes():
     wf = WorkflowDefinition(

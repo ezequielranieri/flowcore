@@ -1,7 +1,7 @@
 import pytest
-from src.flowcore.domain.engine.executor import WorkflowEngine
-from src.flowcore.domain.dsl.models import WorkflowDefinition, Step, TaskDefinition
-from src.flowcore.domain.dsl.registry import registry
+from flowcore.domain.engine.executor import WorkflowEngine
+from flowcore.domain.dsl.models import WorkflowDefinition, Step, TaskDefinition
+from flowcore.domain.dsl.registry import registry
 
 def test_engine_execution_and_context():
     def task_a(ctx): return {"key_a": "val_a"}

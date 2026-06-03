@@ -1,5 +1,5 @@
-from src.flowcore.domain.engine.decision import evaluate_condition, all_predecessors_completed, determine_next_steps
-from src.flowcore.domain.dsl.models import Step
+from flowcore.domain.engine.decision import evaluate_condition, all_predecessors_completed, determine_next_steps
+from flowcore.domain.dsl.models import Step
 
 def test_evaluate_condition():
     assert evaluate_condition("key", {"key": True})

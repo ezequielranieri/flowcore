@@ -1,8 +1,8 @@
 import pytest
-from src.flowcore.domain.engine.executor import WorkflowEngine
-from src.flowcore.domain.dsl.models import WorkflowDefinition, Step, TaskDefinition
-from src.flowcore.domain.dsl.registry import registry
-from src.flowcore.adapters.worker.tasks import execute_workflow_task, execute_step_task
+from flowcore.domain.engine.executor import WorkflowEngine
+from flowcore.domain.dsl.models import WorkflowDefinition, Step, TaskDefinition
+from flowcore.domain.dsl.registry import registry
+from flowcore.adapters.worker.tasks import execute_workflow_task, execute_step_task
 from unittest.mock import patch, MagicMock
 
 def test_distributed_execution_flow(caplog):
@@ -29,8 +29,8 @@ def test_distributed_execution_flow(caplog):
     registry.register_workflow(wf)
     
     # 3. Mock DB and Celery
-    with patch("src.flowcore.adapters.worker.tasks.get_sync_session") as mock_session_factory, \
-         patch("src.flowcore.adapters.worker.tasks.execute_step_task.delay") as mock_delay:
+    with patch("flowcore.adapters.worker.tasks.get_sync_session") as mock_session_factory, \
+         patch("flowcore.adapters.worker.tasks.execute_step_task.delay") as mock_delay:
         
         mock_session = MagicMock()
         mock_session_factory.return_value = mock_session
@@ -40,7 +40,7 @@ def test_distributed_execution_flow(caplog):
         mock_execution.workflow_name = wf_name
         mock_execution.context = {}
         
-        with patch("src.flowcore.adapters.worker.tasks.SyncWorkflowRepository") as mock_repo_cls:
+        with patch("flowcore.adapters.worker.tasks.SyncWorkflowRepository") as mock_repo_cls:
             mock_repo = mock_repo_cls.return_value
             mock_repo.get_execution.return_value = mock_execution
             mock_repo.get_completed_step_names.return_value = set()
@@ -72,9 +72,9 @@ def test_simultaneous_workflows():
     wf = WorkflowDefinition(name=wf_name, steps=[Step(name="step_x", task_name="task_x")])
     registry.register_workflow(wf)
 
-    with patch("src.flowcore.adapters.worker.tasks.get_sync_session"), \
-         patch("src.flowcore.adapters.worker.tasks.SyncWorkflowRepository") as mock_repo_cls, \
-         patch("src.flowcore.adapters.worker.tasks.execute_step_task.delay"):
+    with patch("flowcore.adapters.worker.tasks.get_sync_session"), \
+         patch("flowcore.adapters.worker.tasks.SyncWorkflowRepository") as mock_repo_cls, \
+         patch("flowcore.adapters.worker.tasks.execute_step_task.delay"):
         
         mock_repo = mock_repo_cls.return_value
         

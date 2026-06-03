@@ -1,9 +1,9 @@
 import pytest
-from src.flowcore.domain.dsl.registry import registry
-from src.flowcore.domain.dsl.models import TaskDefinition, WorkflowDefinition, Step
-from src.flowcore.infrastructure.repositories.sync_workflow_repository import SyncWorkflowRepository
+from flowcore.domain.dsl.registry import registry
+from flowcore.domain.dsl.models import TaskDefinition, WorkflowDefinition, Step
+from flowcore.infrastructure.repositories.sync_workflow_repository import SyncWorkflowRepository
 from sqlalchemy import create_engine
-from src.flowcore.infrastructure.db.session import Base
+from flowcore.infrastructure.db.session import Base
 from sqlalchemy.orm import sessionmaker
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def test_registry_registration():
 def test_repository_crud(db_session):
     repo = SyncWorkflowRepository(db_session)
     # Testing repository logic (creating execution and verifying)
-    from src.flowcore.infrastructure.db.models import WorkflowExecution
+    from flowcore.infrastructure.db.models import WorkflowExecution
     execution = WorkflowExecution(workflow_name="test", status="PENDING", context={})
     db_session.add(execution)
     db_session.commit()
@@ -37,7 +37,7 @@ def test_repository_crud(db_session):
     assert fetched.workflow_name == "test"
 
 def test_wait_for_logic():
-    from src.flowcore.domain.engine.decision import all_predecessors_completed
+    from flowcore.domain.engine.decision import all_predecessors_completed
     step = Step(name="step2", task_name="task", wait_for=["step1"])
     assert not all_predecessors_completed(step, {"step3"})
     assert all_predecessors_completed(step, {"step1"})
