@@ -21,11 +21,13 @@ services:
       - DATABASE_URL=postgresql+asyncpg://flowcore:flowcore_password@db:5432/flowcore_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
     ports:
       - "8000:8000"
     depends_on:
       - db
       - redis
+      - jaeger
     command: uvicorn flowcore.adapters.api.main:app --host 0.0.0.0 --port 8000 --reload
 
   worker:
@@ -34,10 +36,18 @@ services:
       - DATABASE_URL=postgresql+asyncpg://flowcore:flowcore_password@db:5432/flowcore_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
     depends_on:
       - db
       - redis
+      - jaeger
     command: celery -A flowcore.adapters.worker.celery_app worker --loglevel=info
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC
 
 volumes:
   postgres_data:

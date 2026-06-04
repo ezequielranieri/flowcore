@@ -16,6 +16,10 @@ dependencies = [
     "opentelemetry-api>=1.20.0",
     "pydantic>=2.0.0",
     "networkx>=3.6.1",
+    "opentelemetry-sdk>=1.42.1",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.42.1",
+    "opentelemetry-instrumentation-fastapi>=0.63b1",
+    "opentelemetry-instrumentation-sqlalchemy>=0.63b1",
 ]
 readme = "README.md"
 requires-python = ">=3.11"
