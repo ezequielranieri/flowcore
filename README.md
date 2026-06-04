@@ -73,7 +73,7 @@ You can visualize and interact with the API endpoints using the Swagger UI.
 - 🔀 **Advanced Flow Control:** Support for Fan-out, Branching (conditions), and Join/Barrier (`wait_for`).
 - 🔄 **Resilience:** Automatic retries with exponential backoff.
 - 🏗️ **Hexagonal Architecture:** Decoupled, testable, and maintainable code.
-- ✅ **Full Persistence:** Every execution state is stored in PostgreSQL.
+- 📊 **Full Persistence:** Every execution state is stored in PostgreSQL.
 - 🔭 **Distributed Tracing:** Full OpenTelemetry instrumentation with Jaeger. Every workflow and step execution is traced end-to-end.
 
 ![Worker Logs](docs/images/worker-logs.png)
