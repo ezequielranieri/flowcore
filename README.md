@@ -75,6 +75,7 @@ You can visualize and interact with the API endpoints using the Swagger UI.
 - 🏗️ **Hexagonal Architecture:** Decoupled, testable, and maintainable code.
 - 📊 **Full Persistence:** Every execution state is stored in PostgreSQL.
 - 🔭 **Distributed Tracing:** Full OpenTelemetry instrumentation with Jaeger. Every workflow and step execution is traced end-to-end.
+- 🔄 **Saga Pattern:** Automatic compensating actions when a step fails. Completed steps are rolled back in reverse order.
 
 ![Worker Logs](docs/images/worker-logs.png)
 
@@ -152,7 +153,7 @@ flowcore/
 2. Phase 2: Real distributed step execution. ✅ Completed
 3. Phase 3: DAG engine with networkx + auto-discovery. ✅ Completed
 4. Phase 4: Observability with OpenTelemetry + Jaeger. ✅ Completed
-5. Phase 5: Sagas / Compensating Actions. (Planned)
+5. Phase 5: Sagas / Compensating Actions. ✅ Completed
 6. Phase 6: Native CLI. (Planned)
 7. Phase 7: Workflow versioning. (Planned)
 8. Phase 8: Multi-tenancy. (Planned)

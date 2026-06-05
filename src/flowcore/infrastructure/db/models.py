@@ -12,7 +12,7 @@ class WorkflowExecution(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     workflow_name: Mapped[str] = mapped_column(String(255))
     current_step_name: Mapped[Optional[str]] = mapped_column(String(255))
-    status: Mapped[str] = mapped_column(String(50), default="PENDING")
+    status: Mapped[str] = mapped_column(String(50), default="PENDING") # PENDING, RUNNING, COMPLETED, FAILED, COMPENSATING, COMPENSATED
     context: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
     
     started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

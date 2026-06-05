@@ -9,6 +9,7 @@ from loguru import logger
 from .celery_app import celery_app
 from ...domain.engine.executor import WorkflowEngine
 from ...domain.engine.decision import all_predecessors_completed, determine_next_steps
+from ...domain.engine.saga import SagaOrchestrator
 from ...domain.dsl.registry import registry
 from ...infrastructure.db.session import get_sync_session
 from ...infrastructure.repositories.sync_workflow_repository import SyncWorkflowRepository
@@ -171,7 +172,29 @@ def execute_step_task(execution_id: int, step_name: str):
                     span.record_exception(e)
                     span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
                     repo.update_step_execution(step_exec.id, "FAILED", error=str(e))
-                    repo.update_execution_status(execution_id, "FAILED", error=f"Step {step_name} failed: {str(e)}")
+                    
+                    # Saga logic: Check if we should compensate
+                    completed_steps = repo.get_completed_step_names(execution_id)
+                    saga = SagaOrchestrator()
+                    
+                    if saga.should_compensate(workflow_def, completed_steps):
+                        logger.warning(f"Step {step_name} failed. Triggering Saga compensation.")
+                        repo.update_execution_status(execution_id, "COMPENSATING", error=f"Step {step_name} failed: {str(e)}")
+                        
+                        compensations = saga.get_compensation_steps(workflow_def, completed_steps)
+                        for comp_task_name in compensations:
+                            try:
+                                logger.info(f"Compensating: {comp_task_name}")
+                                comp_task = registry.get_task(comp_task_name)
+                                # Execute compensation with current context
+                                session.refresh(execution)
+                                comp_task.func(execution.context)
+                            except Exception as ce:
+                                logger.error(f"Error executing compensation {comp_task_name}: {ce}")
+                        
+                        repo.update_execution_status(execution_id, "COMPENSATED")
+                    else:
+                        repo.update_execution_status(execution_id, "FAILED", error=f"Step {step_name} failed: {str(e)}")
                 
         except Exception as e:
             logger.exception(f"Critical error in execute_step_task {execution_id}/{step_name}: {e}")

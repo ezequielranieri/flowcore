@@ -10,6 +10,7 @@ class TaskDefinition(BaseModel):
     max_retries: int = 3
     timeout_seconds: int = 30
     func: Callable
+    compensation_task: Optional[str] = None
 
 class Step(BaseModel):
     name: str
@@ -18,6 +19,7 @@ class Step(BaseModel):
     condition: Optional[str] = None
     wait_for: List[str] = Field(default_factory=list)
     input_mapping: Dict[str, str] = Field(default_factory=dict) # mapping from context to task input
+    compensation_task: Optional[str] = None
 
 class WorkflowDefinition(BaseModel):
     name: str
