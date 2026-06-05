@@ -64,6 +64,14 @@ class WorkflowRepository:
         )
         return set(result.scalars().all())
 
+    async def list_executions(self, limit: int = 20) -> List[WorkflowExecution]:
+        result = await self.session.execute(
+            select(WorkflowExecution)
+            .order_by(WorkflowExecution.id.desc())
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
     async def update_step_status(
         self, 
         step_id: int, 

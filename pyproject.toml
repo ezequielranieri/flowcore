@@ -20,9 +20,15 @@ dependencies = [
     "opentelemetry-exporter-otlp-proto-grpc>=1.42.1",
     "opentelemetry-instrumentation-fastapi>=0.63b1",
     "opentelemetry-instrumentation-sqlalchemy>=0.63b1",
+    "typer>=0.26.7",
+    "rich>=15.0.0",
+    "httpx>=0.28.1",
 ]
 readme = "README.md"
 requires-python = ">=3.11"
+
+[project.scripts]
+flowcore = "flowcore.cli.main:app"
 
 [project.optional-dependencies]
 dev = [

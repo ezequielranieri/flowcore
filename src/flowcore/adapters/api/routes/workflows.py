@@ -29,6 +29,30 @@ async def start_workflow(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
+@router.get("/")
+async def list_workflows():
+    from ....domain.dsl.registry import registry
+    workflows = registry.list_workflows()
+    return [{"name": w.name, "version": w.version, "description": w.description} for w in workflows]
+
+@router.get("/executions")
+async def list_executions(
+    limit: int = 20,
+    db: AsyncSession = Depends(get_db)
+):
+    repo = WorkflowRepository(db)
+    executions = await repo.list_executions(limit)
+    return [
+        {
+            "id": e.id,
+            "workflow_name": e.workflow_name,
+            "status": e.status,
+            "started_at": e.started_at,
+            "completed_at": e.completed_at
+        }
+        for e in executions
+    ]
+
 @router.get("/executions/{execution_id}")
 async def get_workflow_status(
     execution_id: int, 

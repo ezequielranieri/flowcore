@@ -30,6 +30,12 @@ class Registry:
             raise TaskNotFoundError(name)
         return self.tasks[name]
 
+    def list_workflows(self):
+        return list(self.workflows.values())
+
+    def list_tasks(self):
+        return list(self.tasks.values())
+
 # Global registry instance
 registry = Registry()
 
