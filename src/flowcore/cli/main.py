@@ -25,6 +25,7 @@ def get_status_color(status: str) -> str:
 @app.command()
 def run(
     workflow_name: str = typer.Argument(..., help="Name of the workflow to run"),
+    version: Optional[str] = typer.Option(None, "--version", "-v", help="Specific version to run"),
     context: str = typer.Option("{}", "--context", "-c", help="JSON string for the workflow context"),
     host: str = typer.Option("http://localhost:8000", "--host", help="Flowcore API host")
 ):
@@ -36,7 +37,7 @@ def run(
         raise typer.Exit(1)
 
     client = FlowcoreClient(host)
-    result = client.run_workflow(workflow_name, ctx_dict)
+    result = client.run_workflow(workflow_name, ctx_dict, version=version)
 
     if result.get("error") and "execution_id" not in result:
         rprint(f"[red]Error: {result['error']}[/red]")
@@ -48,6 +49,8 @@ def run(
     
     table.add_row("Execution ID", str(result.get("execution_id")))
     table.add_row("Status", result.get("status"))
+    if version:
+        table.add_row("Version", version)
     
     console.print(table)
 

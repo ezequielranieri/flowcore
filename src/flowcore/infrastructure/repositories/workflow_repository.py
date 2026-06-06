@@ -11,9 +11,10 @@ class WorkflowRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create_execution(self, workflow_name: str, context: Dict[str, Any]) -> WorkflowExecution:
+    async def create_execution(self, workflow_name: str, context: Dict[str, Any], workflow_version: str = "1.0.0") -> WorkflowExecution:
         execution = WorkflowExecution(
             workflow_name=workflow_name,
+            workflow_version=workflow_version,
             context=context,
             status="PENDING"
         )

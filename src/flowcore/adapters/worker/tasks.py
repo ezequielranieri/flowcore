@@ -64,7 +64,7 @@ def execute_workflow_task(execution_id: int):
                 span.set_attribute("workflow.execution_id", execution_id)
                 
                 try:
-                    workflow_def = registry.get_workflow(execution.workflow_name)
+                    workflow_def = registry.get_workflow(execution.workflow_name, execution.workflow_version)
                     engine = WorkflowEngine()
                     
                     repo.update_execution_status(execution_id, "RUNNING")
@@ -107,7 +107,7 @@ def execute_step_task(execution_id: int, step_name: str):
                 logger.error(f"Execution {execution_id} not found")
                 return
 
-            workflow_def = registry.get_workflow(execution.workflow_name)
+            workflow_def = registry.get_workflow(execution.workflow_name, execution.workflow_version)
             step = next((s for s in workflow_def.steps if s.name == step_name), None)
             if not step:
                 logger.error(f"Step {step_name} not found in workflow {execution.workflow_name}")

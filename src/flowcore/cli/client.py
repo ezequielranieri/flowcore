@@ -7,9 +7,12 @@ class FlowcoreClient:
     def __init__(self, base_url: str = "http://localhost:8000"):
         self.base_url = base_url.rstrip("/")
 
-    def run_workflow(self, name: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    def run_workflow(self, name: str, context: Dict[str, Any], version: str = None) -> Dict[str, Any]:
         try:
-            response = httpx.post(f"{self.base_url}/workflows/{name}", json=context)
+            params = {}
+            if version:
+                params["version"] = version
+            response = httpx.post(f"{self.base_url}/workflows/{name}", json=context, params=params)
             response.raise_for_status()
             return response.json()
         except httpx.ConnectError:

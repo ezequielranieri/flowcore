@@ -79,6 +79,7 @@ You can visualize and interact with the API endpoints using the Swagger UI.
 - 📊 **Full Persistence:** Every execution state is stored in PostgreSQL.
 - 🔭 **Distributed Tracing:** Full OpenTelemetry instrumentation with Jaeger. Every workflow and step execution is traced end-to-end.
 - 🛡️ **Saga Pattern:** Automatic compensating actions when a step fails. Completed steps are rolled back in reverse order.
+- 🔖 **Workflow Versioning:** Each execution persists the exact workflow version used. Workers resolve the correct definition by version, ensuring in-flight executions are never affected by workflow changes.
 - 💻 **Native CLI:** Interact with Flowcore from the terminal using `flowcore run`, `flowcore status`, `flowcore list` and `flowcore workflows`. Rich-formatted tables with color-coded status.
 
 ![Worker Logs](docs/images/worker-logs.png)
@@ -159,7 +160,7 @@ flowcore/
 4. Phase 4: Observability with OpenTelemetry + Jaeger. ✅ Completed
 5. Phase 5: Sagas / Compensating Actions. ✅ Completed
 6. Phase 6: Native CLI. ✅ Completed
-7. Phase 7: Workflow versioning. (Planned)
+7. Phase 7: Workflow versioning. ✅ Completed
 8. Phase 8: Multi-tenancy. (Planned)
 
 ## Contributing
