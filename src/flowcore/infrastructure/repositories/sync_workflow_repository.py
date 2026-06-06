@@ -105,3 +105,74 @@ class SyncWorkflowRepository:
         )
         return {row[0] for row in result.all()}
 
+    def start_step_atomically(self, step_id: int):
+        """Marca step como RUNNING en una sola operación."""
+        self.session.execute(
+            update(StepExecution)
+            .where(StepExecution.id == step_id)
+            .values(status="RUNNING", executed_at=datetime.utcnow())
+        )
+        self.session.commit()
+
+    def complete_step_atomically(
+        self,
+        step_id: int,
+        execution_id: int,
+        output_data: Dict[str, Any],
+        new_context: Dict[str, Any]
+    ):
+        """
+        Actualiza StepExecution a COMPLETED y WorkflowExecution context
+        en una sola transacción atómica.
+        Si falla cualquier parte, hace rollback de todo.
+        """
+        try:
+            self.session.execute(
+                update(StepExecution)
+                .where(StepExecution.id == step_id)
+                .values(
+                    status="COMPLETED",
+                    output_data=output_data,
+                    completed_at=datetime.utcnow()
+                )
+            )
+            self.session.execute(
+                update(WorkflowExecution)
+                .where(WorkflowExecution.id == execution_id)
+                .values(
+                    context=new_context,
+                    updated_at=datetime.utcnow()
+                )
+            )
+            self.session.commit()
+        except Exception:
+            self.session.rollback()
+            raise
+
+    def fail_step_atomically(
+        self,
+        step_id: int,
+        execution_id: int,
+        error: str,
+        new_status: str = "FAILED"
+    ):
+        """
+        Marca StepExecution como FAILED y WorkflowExecution como FAILED
+        en una sola transacción atómica.
+        """
+        try:
+            self.session.execute(
+                update(StepExecution)
+                .where(StepExecution.id == step_id)
+                .values(status="FAILED", error=error)
+            )
+            self.session.execute(
+                update(WorkflowExecution)
+                .where(WorkflowExecution.id == execution_id)
+                .values(status=new_status, error=error)
+            )
+            self.session.commit()
+        except Exception:
+            self.session.rollback()
+            raise
+

@@ -150,7 +150,7 @@ flowcore/
 ```
 
 ## Known Limitations
-- **Single DB Transaction**: Step execution and status updates are not yet part of a single atomic transaction.
+- **None reported**: All core durability and atomicity requirements are now implemented.
 
 ## Roadmap
 

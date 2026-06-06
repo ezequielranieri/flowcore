@@ -135,7 +135,7 @@ def execute_step_task(execution_id: int, step_name: str):
                 span.set_attribute("worker.id", os.getenv("HOSTNAME", "unknown"))
                 
                 try:
-                    repo.update_step_execution(step_exec.id, "RUNNING")
+                    repo.start_step_atomically(step_exec.id)
                     
                     engine = WorkflowEngine()
                     # Execute step logic
@@ -147,8 +147,12 @@ def execute_step_task(execution_id: int, step_name: str):
                     new_context = execution.context.copy()
                     new_context.update(result)
                     
-                    repo.update_execution_context(execution_id, new_context)
-                    repo.update_step_execution(step_exec.id, "COMPLETED", output_data=result)
+                    repo.complete_step_atomically(
+                        step_id=step_exec.id,
+                        execution_id=execution_id,
+                        output_data=result,
+                        new_context=new_context
+                    )
                     
                     # Determine next steps
                     next_step_names = determine_next_steps(step, new_context)
@@ -171,7 +175,6 @@ def execute_step_task(execution_id: int, step_name: str):
                     logger.exception(f"Error executing step {step_name}")
                     span.record_exception(e)
                     span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
-                    repo.update_step_execution(step_exec.id, "FAILED", error=str(e))
                     
                     # Saga logic: Check if we should compensate
                     completed_steps = repo.get_completed_step_names(execution_id)
@@ -179,7 +182,12 @@ def execute_step_task(execution_id: int, step_name: str):
                     
                     if saga.should_compensate(workflow_def, completed_steps):
                         logger.warning(f"Step {step_name} failed. Triggering Saga compensation.")
-                        repo.update_execution_status(execution_id, "COMPENSATING", error=f"Step {step_name} failed: {str(e)}")
+                        repo.fail_step_atomically(
+                            step_id=step_exec.id,
+                            execution_id=execution_id,
+                            error=str(e),
+                            new_status="COMPENSATING"
+                        )
                         
                         compensations = saga.get_compensation_steps(workflow_def, completed_steps)
                         for comp_task_name in compensations:
@@ -194,7 +202,12 @@ def execute_step_task(execution_id: int, step_name: str):
                         
                         repo.update_execution_status(execution_id, "COMPENSATED")
                     else:
-                        repo.update_execution_status(execution_id, "FAILED", error=f"Step {step_name} failed: {str(e)}")
+                        repo.fail_step_atomically(
+                            step_id=step_exec.id,
+                            execution_id=execution_id,
+                            error=str(e),
+                            new_status="FAILED"
+                        )
                 
         except Exception as e:
             logger.exception(f"Critical error in execute_step_task {execution_id}/{step_name}: {e}")
