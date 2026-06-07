@@ -48,7 +48,7 @@ async def test_execution_stores_workflow_version(clean_registry):
     mock_repo = MagicMock()
     mock_repo.create_execution = MagicMock()
     # Mocking async create_execution
-    async def mock_create(name, context, workflow_version):
+    async def mock_create(name, context, workflow_version, tenant_id="default"):
         mock_exec = MagicMock()
         mock_exec.id = 1
         return mock_exec
@@ -63,11 +63,11 @@ async def test_execution_stores_workflow_version(clean_registry):
     
     # Start with explicit version
     await service.start_workflow("test_wf", {}, version="1.0.0")
-    mock_repo.create_execution.assert_called_with("test_wf", {}, workflow_version="1.0.0")
+    mock_repo.create_execution.assert_called_with("test_wf", {}, workflow_version="1.0.0", tenant_id="default")
     
     # Start with latest (default)
     await service.start_workflow("test_wf", {})
-    mock_repo.create_execution.assert_called_with("test_wf", {}, workflow_version="1.0.0")
+    mock_repo.create_execution.assert_called_with("test_wf", {}, workflow_version="1.0.0", tenant_id="default")
 
 def test_registry_raises_not_found(clean_registry):
     with pytest.raises(WorkflowNotFoundError):

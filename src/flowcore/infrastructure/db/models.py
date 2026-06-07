@@ -10,6 +10,7 @@ class WorkflowExecution(Base):
     __tablename__ = "workflow_executions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(100), default="default", index=True)
     workflow_name: Mapped[str] = mapped_column(String(255))
     workflow_version: Mapped[str] = mapped_column(String(50), default="1.0.0")
     current_step_name: Mapped[Optional[str]] = mapped_column(String(255))

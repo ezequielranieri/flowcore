@@ -11,10 +11,17 @@ class WorkflowRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create_execution(self, workflow_name: str, context: Dict[str, Any], workflow_version: str = "1.0.0") -> WorkflowExecution:
+    async def create_execution(
+        self, 
+        workflow_name: str, 
+        context: Dict[str, Any], 
+        workflow_version: str = "1.0.0",
+        tenant_id: str = "default"
+    ) -> WorkflowExecution:
         execution = WorkflowExecution(
             workflow_name=workflow_name,
             workflow_version=workflow_version,
+            tenant_id=tenant_id,
             context=context,
             status="PENDING"
         )
@@ -22,11 +29,13 @@ class WorkflowRepository:
         await self.session.flush()
         return execution
 
-    async def get_execution(self, execution_id: int) -> Optional[WorkflowExecution]:
+    async def get_execution(self, execution_id: int, tenant_id: Optional[str] = None) -> Optional[WorkflowExecution]:
+        query = select(WorkflowExecution).where(WorkflowExecution.id == execution_id)
+        if tenant_id:
+            query = query.where(WorkflowExecution.tenant_id == tenant_id)
+            
         result = await self.session.execute(
-            select(WorkflowExecution)
-            .where(WorkflowExecution.id == execution_id)
-            .options(selectinload(WorkflowExecution.steps))
+            query.options(selectinload(WorkflowExecution.steps))
         )
         return result.scalar_one_or_none()
 
@@ -65,12 +74,12 @@ class WorkflowRepository:
         )
         return set(result.scalars().all())
 
-    async def list_executions(self, limit: int = 20) -> List[WorkflowExecution]:
-        result = await self.session.execute(
-            select(WorkflowExecution)
-            .order_by(WorkflowExecution.id.desc())
-            .limit(limit)
-        )
+    async def list_executions(self, limit: int = 20, tenant_id: Optional[str] = None) -> List[WorkflowExecution]:
+        query = select(WorkflowExecution).order_by(WorkflowExecution.id.desc()).limit(limit)
+        if tenant_id:
+            query = query.where(WorkflowExecution.tenant_id == tenant_id)
+            
+        result = await self.session.execute(query)
         return list(result.scalars().all())
 
     async def update_step_status(
@@ -85,4 +94,3 @@ class WorkflowRepository:
             .where(StepExecution.id == step_id)
             .values(status=status, output_data=output_data, error=error)
         )
-

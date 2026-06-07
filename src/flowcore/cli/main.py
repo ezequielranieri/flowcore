@@ -26,6 +26,7 @@ def get_status_color(status: str) -> str:
 def run(
     workflow_name: str = typer.Argument(..., help="Name of the workflow to run"),
     version: Optional[str] = typer.Option(None, "--version", "-v", help="Specific version to run"),
+    tenant: str = typer.Option("default", "--tenant", "-t", help="Tenant ID"),
     context: str = typer.Option("{}", "--context", "-c", help="JSON string for the workflow context"),
     host: str = typer.Option("http://localhost:8000", "--host", help="Flowcore API host")
 ):
@@ -36,7 +37,7 @@ def run(
         rprint("[red]Error: Context must be a valid JSON string.[/red]")
         raise typer.Exit(1)
 
-    client = FlowcoreClient(host)
+    client = FlowcoreClient(host, tenant_id=tenant)
     result = client.run_workflow(workflow_name, ctx_dict, version=version)
 
     if result.get("error") and "execution_id" not in result:
@@ -49,6 +50,7 @@ def run(
     
     table.add_row("Execution ID", str(result.get("execution_id")))
     table.add_row("Status", result.get("status"))
+    table.add_row("Tenant", tenant)
     if version:
         table.add_row("Version", version)
     
@@ -57,10 +59,11 @@ def run(
 @app.command()
 def status(
     execution_id: int = typer.Argument(..., help="ID of the execution to check"),
+    tenant: str = typer.Option("default", "--tenant", "-t", help="Tenant ID"),
     host: str = typer.Option("http://localhost:8000", "--host", help="Flowcore API host")
 ):
     """Get the status of a specific workflow execution."""
-    client = FlowcoreClient(host)
+    client = FlowcoreClient(host, tenant_id=tenant)
     result = client.get_status(execution_id)
 
     if result.get("error") and "id" not in result:
@@ -87,17 +90,18 @@ def status(
 @app.command(name="list")
 def list_executions(
     limit: int = typer.Option(20, "--limit", "-l", help="Number of executions to show"),
+    tenant: str = typer.Option("default", "--tenant", "-t", help="Tenant ID"),
     host: str = typer.Option("http://localhost:8000", "--host", help="Flowcore API host")
 ):
     """List recent workflow executions."""
-    client = FlowcoreClient(host)
+    client = FlowcoreClient(host, tenant_id=tenant)
     results = client.list_executions(limit)
 
     if isinstance(results, dict) and "error" in results:
         rprint(f"[red]Error: {results['error']}[/red]")
         raise typer.Exit(1)
 
-    table = Table(title=f"Recent Executions (limit: {limit})")
+    table = Table(title=f"Recent Executions (limit: {limit}, tenant: {tenant})")
     table.add_column("ID", style="cyan")
     table.add_column("Workflow", style="magenta")
     table.add_column("Status")

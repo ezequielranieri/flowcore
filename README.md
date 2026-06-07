@@ -81,6 +81,7 @@ You can visualize and interact with the API endpoints using the Swagger UI.
 - 🛡️ **Saga Pattern:** Automatic compensating actions when a step fails. Completed steps are rolled back in reverse order.
 - 🔖 **Workflow Versioning:** Each execution persists the exact workflow version used. Workers resolve the correct definition by version, ensuring in-flight executions are never affected by workflow changes.
 - 💻 **Native CLI:** Interact with Flowcore from the terminal using `flowcore run`, `flowcore status`, `flowcore list` and `flowcore workflows`. Rich-formatted tables with color-coded status.
+- 🏢 **Multi-tenancy:** Full tenant isolation via X-Tenant-ID header. Each tenant sees only their own executions. Cross-tenant access is blocked at the API level.
 
 ![Worker Logs](docs/images/worker-logs.png)
 
@@ -161,7 +162,7 @@ flowcore/
 5. Phase 5: Sagas / Compensating Actions. ✅ Completed
 6. Phase 6: Native CLI. ✅ Completed
 7. Phase 7: Workflow versioning. ✅ Completed
-8. Phase 8: Multi-tenancy. (Planned)
+8. Phase 8: Multi-tenancy. ✅ Completed
 
 ## Contributing
 Contributions are welcome! Please read `CONTRIBUTING.md` for more details on how to get started.

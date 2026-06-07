@@ -10,7 +10,13 @@ class WorkflowService:
         self.repository = repository
         self.celery_app = celery_app
 
-    async def start_workflow(self, workflow_name: str, context: Dict[str, Any], version: Optional[str] = None) -> int:
+    async def start_workflow(
+        self, 
+        workflow_name: str, 
+        context: Dict[str, Any], 
+        version: Optional[str] = None,
+        tenant_id: str = "default"
+    ) -> int:
         """
         Starts a workflow execution.
         1. Validates workflow exists in registry.
@@ -27,7 +33,12 @@ class WorkflowService:
             raise WorkflowNotFoundError(f"{workflow_name} v{version}")
 
         # Create record
-        execution = await self.repository.create_execution(workflow_name, context, workflow_version=version)
+        execution = await self.repository.create_execution(
+            workflow_name, 
+            context, 
+            workflow_version=version,
+            tenant_id=tenant_id
+        )
         await self.repository.session.commit()
 
         # Enqueue start
@@ -41,4 +52,3 @@ class WorkflowService:
             )
         
         return execution.id
-
