@@ -1,3 +1,3 @@
-# Author: Ezequiel Ranieri <ez.ranieri@gmail.com>
+from flowcore.__version__ import __version__
 
-
+__all__ = ["__version__"]

@@ -1,4 +1,11 @@
 # Flowcore
+
+![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)
+![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)
+![Code Style](https://img.shields.io/badge/code%20style-ruff-000000.svg)
+
 A distributed and durable workflow engine for Python.
 
 > Built by [Ezequiel Ranieri](https://github.com/ezequielranieri) 
