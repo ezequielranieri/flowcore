@@ -1,5 +1,5 @@
 [project]
-name = "flowcore"
+name = "flowcore-engine"
 version = "0.1.0"
 description = "A distributed and durable workflow engine"
 authors = [{ name = "Ezequiel Ranieri", email = "ez.ranieri@gmail.com" }]
@@ -26,6 +26,17 @@ dependencies = [
 ]
 readme = "README.md"
 requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["workflow", "distributed", "celery", "python", "orchestration"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Distributed Computing",
+]
 
 [project.scripts]
 flowcore = "flowcore.cli.main:app"
@@ -53,8 +64,10 @@ pythonpath = ["."]
 
 [dependency-groups]
 dev = [
+    "build>=1.5.0",
     "docker>=7.1.0",
     "httpx>=0.28.1",
     "pytest-celery>=1.3.0",
     "testcontainers>=4.14.2",
+    "twine>=6.2.0",
 ]
