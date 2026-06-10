@@ -38,6 +38,7 @@ def test_distributed_execution_flow(caplog):
         # Mock Repo behavior
         mock_execution = MagicMock()
         mock_execution.workflow_name = wf_name
+        mock_execution.workflow_version = "1.0.0"
         mock_execution.context = {}
         
         with patch("flowcore.adapters.worker.tasks.SyncWorkflowRepository") as mock_repo_cls:
@@ -45,6 +46,10 @@ def test_distributed_execution_flow(caplog):
             mock_repo.get_execution.return_value = mock_execution
             mock_repo.get_completed_step_names.return_value = set()
             mock_repo.get_step_execution.return_value = None
+            
+            # Register with version to match mock
+            wf.version = "1.0.0"
+            registry.register_workflow(wf)
             
             # Start workflow
             execute_workflow_task(1)
@@ -59,17 +64,18 @@ def test_distributed_execution_flow(caplog):
             # Should enqueue step_b
             mock_delay.assert_called_with(1, "step_b")
             
-            # Should update context with result from task_a
-            mock_repo.update_execution_context.assert_called()
-            args, _ = mock_repo.update_execution_context.call_args
-            assert args[1] == {"a": 1}
+            # Should update context and step state atomicaaly
+            mock_repo.complete_step_atomically.assert_called()
+            args, kwargs = mock_repo.complete_step_atomically.call_args
+            assert kwargs["output_data"] == {"a": 1}
+            assert kwargs["new_context"] == {"a": 1}
 
 def test_simultaneous_workflows():
     # Verify that calling tasks with different IDs works correctly
     wf_name = "sim_wf"
     def task_x(ctx): return {"x": 100}
     registry.register_task(TaskDefinition(name="task_x", func=task_x))
-    wf = WorkflowDefinition(name=wf_name, steps=[Step(name="step_x", task_name="task_x")])
+    wf = WorkflowDefinition(name=wf_name, steps=[Step(name="step_x", task_name="task_x")], version="1.0.0")
     registry.register_workflow(wf)
 
     with patch("flowcore.adapters.worker.tasks.get_sync_session"), \
@@ -79,9 +85,9 @@ def test_simultaneous_workflows():
         mock_repo = mock_repo_cls.return_value
         
         # Setup for WF 1
-        exec1 = MagicMock(workflow_name=wf_name, context={})
+        exec1 = MagicMock(workflow_name=wf_name, workflow_version="1.0.0", context={})
         # Setup for WF 2
-        exec2 = MagicMock(workflow_name=wf_name, context={})
+        exec2 = MagicMock(workflow_name=wf_name, workflow_version="1.0.0", context={})
         
         mock_repo.get_execution.side_effect = [exec1, exec2]
         mock_repo.get_completed_step_names.return_value = set()
