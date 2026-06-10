@@ -52,6 +52,16 @@ class OrderWorkflow:
 
 Flowcore allows you to define complex, multi-step workflows in Python using a declarative DSL and execute them in a distributed environment with guaranteed persistence and resilience.
 
+## Examples
+
+Flowcore includes real-world examples that demonstrate its core features:
+
+- **[Payment Pipeline with Saga](examples/payment_with_saga.py)**: Automatic compensation when payment fails after inventory reservation.
+  
+- **[Parallel User Onboarding](examples/parallel_onboarding.py)**: Fan-out with join/barrier — account setup runs in parallel, activation waits for all branches.
+  
+- **[Versioned Deployment](examples/versioned_deployment.py)**: Two workflow versions running simultaneously without interference.
+
 ## Quickstart
 
 ```bash

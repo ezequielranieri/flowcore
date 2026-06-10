@@ -58,6 +58,9 @@ class WorkflowEngine:
         while queue:
             step = queue.popleft()
             
+            if step.name in completed_steps:
+                continue
+
             if not all_predecessors_completed(step, completed_steps):
                 continue
 
