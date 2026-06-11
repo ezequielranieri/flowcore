@@ -62,6 +62,15 @@ Flowcore includes real-world examples that demonstrate its core features:
   
 - **[Versioned Deployment](examples/versioned_deployment.py)**: Two workflow versions running simultaneously without interference.
 
+## Documentation
+
+- [DSL Reference](docs/dsl-reference.md)
+- [Configuration](docs/configuration.md)
+- [How-to: First Workflow](docs/how-to/first-workflow.md)
+- [How-to: Sagas](docs/how-to/sagas.md)
+- [How-to: Multi-tenancy](docs/how-to/multi-tenancy.md)
+- [How-to: Observability](docs/how-to/observability.md)
+
 ## Quickstart
 
 ```bash
