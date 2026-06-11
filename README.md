@@ -1,4 +1,8 @@
-# Flowcore
+<p align="center">
+  <img src="docs/images/logo.png" alt="Flowcore Logo" width="180"/>
+</p>
+
+<h1 align="center">Flowcore</h1>
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
