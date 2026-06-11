@@ -7,7 +7,7 @@ Flowcore uses a Python-based DSL to define tasks and workflows. This document pr
 ### `@task`
 The basic building block of Flowcore. It registers a Python function as a task that can be executed by the worker.
 
-**Location:** `src\flowcore\domain\dsl\primitives.py`
+**Location:** `src/flowcore/domain/dsl/primitives.py`
 
 **Parameters:**
 - `name` (str): Unique name of the task in the registry.
