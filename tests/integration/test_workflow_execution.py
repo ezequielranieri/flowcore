@@ -2,7 +2,7 @@
 
 import time
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from flowcore.infrastructure.db.models import WorkflowExecution, StepExecution
 
 def poll_workflow_status(api_client, execution_id, target_status="COMPLETED", timeout=30):
@@ -65,7 +65,7 @@ def test_fanout_workflow_completes_correctly(api_client, celery_worker, db_sessi
 def test_worker_crash_recovery(api_client, db_session, redis_container, postgres_container, workflow_registry):
     """3. Pruebe que los pasos colgados vuelven a PENDING al reiniciar el worker."""
     # 1. Insertar manualmente un StepExecution en RUNNING de hace 20 minutos
-    old_time = datetime.utcnow() - timedelta(minutes=20)
+    old_time = datetime.now(UTC) - timedelta(minutes=20)
     
     execution = WorkflowExecution(workflow_name="order_process", status="RUNNING", context={"order_id": "789"})
     db_session.add(execution)

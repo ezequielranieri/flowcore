@@ -1,6 +1,6 @@
 # Author: Ezequiel Ranieri <ez.ranieri@gmail.com>
 
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional, Any, Dict
 from sqlalchemy import String, JSON, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -17,8 +17,8 @@ class WorkflowExecution(Base):
     status: Mapped[str] = mapped_column(String(50), default="PENDING") # PENDING, RUNNING, COMPLETED, FAILED, COMPENSATING, COMPENSATED
     context: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
     
-    started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     
     error: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -42,7 +42,7 @@ class StepExecution(Base):
     input_data: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
     output_data: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
     
-    executed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    executed_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     
     error: Mapped[Optional[str]] = mapped_column(String, nullable=True)

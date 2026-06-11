@@ -1,7 +1,7 @@
 # Author: Ezequiel Ranieri <ez.ranieri@gmail.com>
 
 from typing import List, Optional, Set, Dict, Any
-from datetime import datetime
+from datetime import datetime, timedelta, UTC
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import selectinload
@@ -12,9 +12,7 @@ class SyncWorkflowRepository:
         self.session = session
 
     def get_stuck_steps(self, timeout_minutes: int) -> List[StepExecution]:
-        from datetime import datetime, timedelta
-        
-        limit_time = datetime.utcnow() - timedelta(minutes=timeout_minutes)
+        limit_time = datetime.now(UTC) - timedelta(minutes=timeout_minutes)
         result = self.session.execute(
             select(StepExecution)
             .where(StepExecution.status == "RUNNING")
@@ -53,7 +51,7 @@ class SyncWorkflowRepository:
         self.session.execute(
             update(WorkflowExecution)
             .where(WorkflowExecution.id == execution_id)
-            .values(context=context, updated_at=datetime.utcnow())
+            .values(context=context, updated_at=datetime.now(UTC))
         )
         self.session.commit()
 
@@ -88,7 +86,7 @@ class SyncWorkflowRepository:
         if output_data is not None:
             values["output_data"] = output_data
         if status == "COMPLETED":
-            values["completed_at"] = datetime.utcnow()
+            values["completed_at"] = datetime.now(UTC)
         
         self.session.execute(
             update(StepExecution)
@@ -110,7 +108,7 @@ class SyncWorkflowRepository:
         self.session.execute(
             update(StepExecution)
             .where(StepExecution.id == step_id)
-            .values(status="RUNNING", executed_at=datetime.utcnow())
+            .values(status="RUNNING", executed_at=datetime.now(UTC))
         )
         self.session.commit()
 
@@ -133,7 +131,7 @@ class SyncWorkflowRepository:
                 .values(
                     status="COMPLETED",
                     output_data=output_data,
-                    completed_at=datetime.utcnow()
+                    completed_at=datetime.now(UTC)
                 )
             )
             self.session.execute(
@@ -141,7 +139,7 @@ class SyncWorkflowRepository:
                 .where(WorkflowExecution.id == execution_id)
                 .values(
                     context=new_context,
-                    updated_at=datetime.utcnow()
+                    updated_at=datetime.now(UTC)
                 )
             )
             self.session.commit()

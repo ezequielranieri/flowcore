@@ -3,7 +3,7 @@ from celery.signals import worker_init
 # Author: Ezequiel Ranieri <ez.ranieri@gmail.com>
 
 import os
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List
 from loguru import logger
 from .celery_app import celery_app
@@ -166,7 +166,7 @@ def execute_step_task(execution_id: int, step_name: str):
                         # Refresh completed steps set
                         completed = repo.get_completed_step_names(execution_id)
                         if dag.is_workflow_complete(completed):
-                             repo.update_execution_status(execution_id, "COMPLETED", completed_at=datetime.utcnow())
+                             repo.update_execution_status(execution_id, "COMPLETED", completed_at=datetime.now(UTC))
                              logger.info(f"Workflow {execution_id} completed successfully")
 
                     span.set_status(trace.Status(trace.StatusCode.OK))

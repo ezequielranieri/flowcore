@@ -53,3 +53,51 @@ def test_fail_step_atomically_updates_both_tables(repo, mock_session):
     assert mock_session.execute.call_count == 2
     mock_session.commit.assert_called_once()
     mock_session.rollback.assert_not_called()
+
+def test_start_step_atomically(repo, mock_session):
+    step_id = 1
+    repo.start_step_atomically(step_id)
+    
+    mock_session.execute.assert_called_once()
+    mock_session.commit.assert_called_once()
+
+def test_get_completed_step_names(repo, mock_session):
+    execution_id = 10
+    mock_result = MagicMock()
+    mock_result.all.return_value = [("step1",), ("step2",)]
+    mock_session.execute.return_value = mock_result
+    
+    names = repo.get_completed_step_names(execution_id)
+    
+    assert names == {"step1", "step2"}
+    mock_session.execute.assert_called_once()
+
+def test_get_stuck_steps(repo, mock_session):
+    mock_result = MagicMock()
+    mock_result.scalars.return_value.all.return_value = []
+    mock_session.execute.return_value = mock_result
+    
+    steps = repo.get_stuck_steps(15)
+    assert steps == []
+    mock_session.execute.assert_called_once()
+
+def test_reset_step_status(repo, mock_session):
+    repo.reset_step_status(1)
+    mock_session.execute.assert_called_once()
+    mock_session.commit.assert_called_once()
+
+def test_update_execution_status(repo, mock_session):
+    repo.update_execution_status(1, "RUNNING")
+    mock_session.execute.assert_called_once()
+    mock_session.commit.assert_called_once()
+
+def test_update_execution_context(repo, mock_session):
+    repo.update_execution_context(1, {"new": "data"})
+    mock_session.execute.assert_called_once()
+    mock_session.commit.assert_called_once()
+
+def test_create_step_execution(repo, mock_session):
+    repo.create_step_execution(1, "step_name", {"input": 1})
+    mock_session.add.assert_called_once()
+    mock_session.commit.assert_called_once()
+    mock_session.refresh.assert_called_once()
