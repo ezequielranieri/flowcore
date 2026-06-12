@@ -60,11 +60,26 @@ Flowcore allows you to define complex, multi-step workflows in Python using a de
 
 Flowcore includes real-world examples that demonstrate its core features:
 
-- **[Payment Pipeline with Saga](examples/payment_with_saga.py)**: Automatic compensation when payment fails after inventory reservation.
-  
-- **[Parallel User Onboarding](examples/parallel_onboarding.py)**: Fan-out with join/barrier — account setup runs in parallel, activation waits for all branches.
-  
-- **[Versioned Deployment](examples/versioned_deployment.py)**: Two workflow versions running simultaneously without interference.
+- **[Payment Pipeline with Saga](examples/payment_with_saga.py)**: Automatic compensation when payment fails after inventory reservation. Run it standalone with `python examples/payment_with_saga.py`.
+
+- **[Parallel User Onboarding](examples/parallel_onboarding.py)**: Fan-out with join/barrier — account setup runs in parallel, activation waits for all branches. Run it standalone with `python examples/parallel_onboarding.py`.
+
+- **[Versioned Deployment](examples/versioned_deployment.py)**: Two workflow versions running simultaneously without interference. Run it standalone with `python examples/versioned_deployment.py`.
+
+Each script runs immediately using the in-memory `WorkflowEngine` — no need to start the full stack. For example, running the saga script produces:
+```text
+--- Running Payment Workflow with amount: $1500 ---
+ [Step] Validating payment amount...
+ [Saga Step] Reserving $1500 from user account...
+ [Saga Step] Reserving item SKU-123 in inventory...
+ [Step] Processing actual payment of $1500...
+ [!] Payment gateway rejected: High amount detected.
+--- Workflow Failed: Payment gateway error: Transaction limit exceeded ---
+Starting Saga Compensation Sequence...
+ [Compensation] Releasing inventory reservation...
+ [Compensation] Releasing reserved funds...
+--- All compensations completed. System is consistent. ---
+```
 
 ## Documentation
 
