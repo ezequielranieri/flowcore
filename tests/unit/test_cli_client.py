@@ -64,3 +64,92 @@ def test_list_executions_success(client):
     assert len(result) == 2
     assert result[0]["id"] == 1
     assert result[1]["id"] == 2
+
+def test_run_workflow_with_version(client):
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"status": "ok"}
+    
+    with patch("httpx.post", return_value=mock_response) as mock_post:
+        result = client.run_workflow("test-wf", {}, version="2.0.0")
+        
+    assert result == {"status": "ok"}
+    mock_post.assert_called_once()
+    assert mock_post.call_args.kwargs["params"] == {"version": "2.0.0"}
+
+def test_run_workflow_http_status_error(client):
+    mock_response = MagicMock()
+    mock_response.status_code = 500
+    mock_response.text = "Internal Error"
+    mock_request = MagicMock()
+    error = httpx.HTTPStatusError("500 Internal Error", request=mock_request, response=mock_response)
+    
+    with patch("httpx.post", side_effect=error):
+        result = client.run_workflow("test-wf", {})
+        
+    assert "error" in result
+    assert "API Error: 500" in result["error"]
+    assert "Internal Error" in result["error"]
+
+def test_run_workflow_unexpected_error(client):
+    with patch("httpx.post", side_effect=Exception("boom")):
+        result = client.run_workflow("test-wf", {})
+        
+    assert result["error"] == "Unexpected error: boom"
+
+def test_get_status_connection_error(client):
+    with patch("httpx.get", side_effect=httpx.ConnectError("fail")):
+        result = client.get_status(1)
+        
+    assert "Could not connect" in result["error"]
+
+def test_get_status_http_status_error_non_404(client):
+    mock_response = MagicMock()
+    mock_response.status_code = 500
+    mock_request = MagicMock()
+    error = httpx.HTTPStatusError("500", request=mock_request, response=mock_response)
+    
+    with patch("httpx.get", side_effect=error):
+        result = client.get_status(1)
+        
+    assert result["error"] == "API Error: 500"
+
+def test_get_status_unexpected_error(client):
+    with patch("httpx.get", side_effect=Exception("boom")):
+        result = client.get_status(1)
+        
+    assert result["error"] == "Unexpected error: boom"
+
+def test_list_executions_connection_error(client):
+    with patch("httpx.get", side_effect=httpx.ConnectError("fail")):
+        result = client.list_executions()
+        
+    assert "Could not connect" in result["error"]
+
+def test_list_executions_unexpected_error(client):
+    with patch("httpx.get", side_effect=Exception("boom")):
+        result = client.list_executions()
+        
+    assert result["error"] == "Unexpected error: boom"
+
+def test_list_workflows_success(client):
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = [{"name": "wf1"}]
+    
+    with patch("httpx.get", return_value=mock_response):
+        result = client.list_workflows()
+        
+    assert result == [{"name": "wf1"}]
+
+def test_list_workflows_connection_error(client):
+    with patch("httpx.get", side_effect=httpx.ConnectError("fail")):
+        result = client.list_workflows()
+        
+    assert "Could not connect" in result["error"]
+
+def test_list_workflows_unexpected_error(client):
+    with patch("httpx.get", side_effect=Exception("boom")):
+        result = client.list_workflows()
+        
+    assert result["error"] == "Unexpected error: boom"

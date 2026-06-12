@@ -1,6 +1,7 @@
 import pytest
 from flowcore.domain.dsl.registry import registry
 from flowcore.domain.dsl.models import TaskDefinition, WorkflowDefinition, Step
+from flowcore.domain.dsl.exceptions import TaskNotFoundError, WorkflowNotFoundError
 from flowcore.infrastructure.repositories.sync_workflow_repository import SyncWorkflowRepository
 from sqlalchemy import create_engine
 from flowcore.infrastructure.db.session import Base
@@ -41,3 +42,24 @@ def test_wait_for_logic():
     step = Step(name="step2", task_name="task", wait_for=["step1"])
     assert not all_predecessors_completed(step, {"step3"})
     assert all_predecessors_completed(step, {"step1"})
+
+def test_registry_get_task_not_found():
+    with pytest.raises(TaskNotFoundError):
+        registry.get_task("nonexistent_task_xyz")
+
+def test_registry_list_workflows():
+    workflow = WorkflowDefinition(name="list_test_wf", version="1.0.0")
+    registry.register_workflow(workflow)
+    workflows = registry.list_workflows()
+    assert any(wf.name == "list_test_wf" for wf in workflows)
+
+def test_registry_get_latest_version_not_found():
+    with pytest.raises(WorkflowNotFoundError):
+        registry.get_latest_version("nonexistent_workflow_xyz")
+
+def test_registry_list_tasks():
+    def dummy_task(ctx): return {}
+    task = TaskDefinition(name="list_test_task", func=dummy_task)
+    registry.register_task(task)
+    tasks = registry.list_tasks()
+    assert any(t.name == "list_test_task" for t in tasks)
