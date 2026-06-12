@@ -8,7 +8,7 @@ Ensure you have the project installed and the environment set up:
 
 ```bash
 # Clone the repository
-git clone https://github.com/eranieri/flowcore.git
+git clone https://github.com/ezequielranieri/flowcore.git
 cd flowcore
 
 # Install dependencies (using uv)
