@@ -89,6 +89,7 @@ Starting Saga Compensation Sequence...
 - [How-to: Sagas](docs/how-to/sagas.md)
 - [How-to: Multi-tenancy](docs/how-to/multi-tenancy.md)
 - [How-to: Observability](docs/how-to/observability.md)
+- [Production Deployment Guide](docs/production.md)
 
 ## Quickstart
 
